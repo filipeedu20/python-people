@@ -5,7 +5,7 @@ class PessoaDAO(models.Manager):
 	def retorna_C(self):
 		return self.filter(nome__startswith="C")
 
-	def nova(nome, idade, data_nascimento, cpf,
+	def nova(self,nome, idade, data_nascimento, cpf,
 		logradouro, numero, bairro, cep):
 		p = Pessoa(nome=nome, idade=idade,
 			data_nascimento = data_nascimento, cpf = cpf)
@@ -14,6 +14,15 @@ class PessoaDAO(models.Manager):
 			bairro=bairro, cep=cep)
 		p.save()
 		end.save()
+		return p
+
+	
+	def salvar_alt(self, id, nome, idade, cpf):
+		p = Pessoa.objects.get(id=id)
+		p.nome = nome
+		p.idade = idade
+		p.cpf = cpf
+		p.save()
 		return p
 
 class Pessoa(models.Model):
@@ -44,3 +53,18 @@ class Endereco(models.Model):
 			Bairro {self.bairro}. CEP: {self.cep}
 		"""
 		return detalhe
+
+class Departamento(models.Model):
+	nomeDep 		= models.CharField(max_length=30, null=True)
+	descricaoDep	= models.CharField(max_length=200, null=True)
+
+	def alt_departamento(self, id, nomeDep):
+		dep = Departamento.objects.get(id=id)
+		dep.nomeDep = nomeDep
+		dep.save()
+		return p
+
+
+class Cargo(models.Model):
+	nomeCargo 		= models.CharField(max_length=30, null=True)
+	descricaoCargo 	= models.CharField(max_length=200, null=True)

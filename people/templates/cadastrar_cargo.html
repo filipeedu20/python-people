@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<h1>Cadastro de Cargos </h1>
+	<form action="/people/salvar_cargo/" method="post">
+		{% csrf_token %}
+		<p>Nome: <input type="text" name="nomeCargo"></p>
+		<p>Descrição: <input type="text" name="descricaoCargo"></p>
+		<p><input type="submit" name="Enviar"></p>
+	</form>
+	<p><a href="{% url 'listar_cargo' %}">Voltar</a></p>
+</body>
+</html>

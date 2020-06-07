@@ -1,0 +1,12 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+	<form action="/people/salvar_alt_dep/" method="POST">
+		{% csrf_token %}
+		<p>Id: <input type="text" name="id" value={{departamento.id}} readonly></p>
+		<p>Nome do departamento: <input type="text" name="nome" value={{departamento.nomeDep}}></p>
+		<p><input type="submit" name="Enviar"></p>
+	</form>
+</body>
+</html>

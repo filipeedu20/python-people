@@ -1,0 +1,20 @@
+<a href="/people/cadastrar_cargo">Cadastrar Novo Cargo</a>
+<br>
+<h1>Lista de Cargos </h1>
+{% load static %}
+{% if lista %}
+	<ul>
+	{% for cargo in lista %}
+		<li>
+			<a href="{% url 'detalhar_cargo' cargo.id %}">{{cargo.nomeCargo}}</a>
+			<a href="{% url 'alterar_cargo' cargo.id %}">Editar</a>
+			<a href="{% url 'excluir_cargo' cargo.id %}">
+				<img src="{% static 'excluir.png' %}" width="20" height="20">
+			</a>
+		</li>
+	{% endfor %}
+	</ul>
+
+{% else %}
+	<p>Não há Cargos cadastradas</p>
+{% endif %}

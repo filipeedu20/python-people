@@ -1,0 +1,15 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+	<h1>Alteração de Cargo: {{cargo.nomeCargo}}</h1>
+	<form action="/people/salva_alt_cargo/" method="POST">
+		{% csrf_token %}
+		 <input type="text" name="id" value={{cargo.id}} readonly>	
+		<p>Nome: <input type="text" name="nomeCargo" value={{cargo.nomeCargo}}></p>
+		<p>Descrição: <input type="text" name="descricaoCargo" value={{cargo.descricaoCargo}}></p>
+		<p><input type="submit" name="Enviar"></p>
+	</form>
+	<p><a href="{% url 'listar_cargo' %}">Voltar</a></p>
+</body>
+</html>

@@ -3,10 +3,10 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
-
-
+from django.template import loader
+from django.shortcuts import render
+from datetime import datetime
 from ..models import Pessoa, Endereco, Departamento, Cargo
-
 @require_http_methods(["GET","POST"])
 def home(request):
 	return HttpResponse("Olá, requisição feita com sucesso!")
@@ -14,16 +14,17 @@ def home(request):
 @csrf_exempt
 @require_http_methods(["POST","GET"])
 def listar(request):
-	lista = Pessoa.objects.all()
-	html = "<ul>"
-	for p in lista:
-		html+=f"<li>{p.nome} (id={p.id})</li>"
-	html+= "</ul>"
-	return HttpResponse(html)
+	result = Pessoa.objects.all()
+	template = loader.get_template('listar.html')
+	context = {
+		'lista' : result,
+	}
+	return HttpResponse(template.render(context, request))
 
 def detalhar(request, id_pessoa):
 	pessoa = Pessoa.objects.get(id=id_pessoa)
-	return HttpResponse(f"Detalhou {pessoa.nome} (id={pessoa.id})")
+	context = {'pessoa':pessoa}
+	return render(request, 'detalhe.html', context)
 
 def excluir(request, id_pessoa):
 	try:
@@ -33,27 +34,59 @@ def excluir(request, id_pessoa):
 	except ObjectDoesNotExist:
 		return HttpResponse("Pessoa não encontrada")
 
-def cadastrar(request):
-	p = Pessoa(nome="Matheus", idade=21)
-	p.save()
-	return HttpResponse(f"{p.nome} cadastrado com sucesso (id={p.id})")
+def cadastro(request):
+	sexos = ['Masculino','Feminino']
+	template = loader.get_template('cadastrar.html')
+	context = {
+		'sexos': sexos,
+	}
+	return HttpResponse(template.render(context, request))
 
+def cadastrar(request):
+	dtNascimento = datetime.strptime(request.POST['dtNascimento'], "%d/%m/%Y").date()
+	p = Pessoa.objects.nova(request.POST['nome'],
+			request.POST['idade'],
+			dtNascimento,
+			request.POST['cpf'],
+			request.POST['logradouro'],
+			request.POST['numero'],
+			request.POST['bairro'],
+			request.POST['cep'])
+
+	return HttpResponse(f"{p} cadastrado com sucesso")
+
+def alterar(request, id_pessoa):
+	pessoa = Pessoa.objects.get(id=id_pessoa)
+	context = {'pessoa':pessoa}
+	return render(request, 'editar.html', context)
+
+@csrf_exempt
+@require_http_methods(["POST","GET"])
+def salvar_alt(request):
+	p = Pessoa.objects.salvar_alt(
+			request.POST['id'],
+			request.POST['nome'],
+			request.POST['idade'],
+			request.POST['cpf'])
+	return HttpResponse(f"{p} alterado com sucesso")
+## Manipulação de departamento 
 def cadastrar_departamento(request):
 	d = Departamento(nomeDep="Recursos Humanos")
 	d.save()
 	return HttpResponse(f"{d.nomeDep} Departamento cadastrado com sucesso (id={d.id})")
 
 def listar_dep(request):
-	lista = Departamento.objects.all()
-	html = "<ul>"
-	for p in lista:
-		html+=f"<li>{p.nomeDep} (id={p.id})</li>"
-	html+= "</ul>"
-	return HttpResponse(html)
+	result = Departamento.objects.all()
+	template = loader.get_template('listar_departamento.html')
+	context = {
+		'lista' : result,
+	}
+	return HttpResponse(template.render(context, request))
 
 def detalhar_dep(request, id_dep):
 	dep = Departamento.objects.get(id=id_dep)
-	return HttpResponse(f"Detalhou Departamento: {dep.nomeDep} (id={dep.id})")
+	context = {'dep':dep}
+	return render(request, 'detalhe_dep.html', context)
 
 def excluir_dep(request, id_dep):
 	try:
@@ -61,24 +94,40 @@ def excluir_dep(request, id_dep):
 		dep.delete()		
 		return HttpResponse(f"Excluiu {dep.nomeDep} (id={dep.id})")
 	except ObjectDoesNotExist:
-		return HttpResponse("Departamento não encontrada")
+		return HttpResponse("Departamento não encontrado")
 
+
+# Manipulação de Cargos
 def cadastrar_cargo(request):
-	c = Cargo(nomeCargo="Analista Financeiro")
+	template = loader.get_template('cadastrar_cargo.html')
+	context = {}
+	return HttpResponse(template.render(context, request))
+
+def salvar_cargo(request):
+	c = Cargo(nomeCargo = request.POST['nomeCargo'],descricaoCargo = request.POST['descricaoCargo'])
 	c.save()
-	return HttpResponse(f"{c.nomeCargo} Cargo cadastrado com sucesso (id={c.id})")
+	return HttpResponse(f"{c} Cargo cadastrado com sucesso")
 
 def detalhar_cargo(request, id_cargo):
-	cargo = Cargo.objects.get(id=id_cargo)
-	return HttpResponse(f"Detalhou Cargo: {cargo.nomeCargo} (id={cargo.id})")
+	result = Cargo.objects.get(id=id_cargo)
+	template = loader.get_template('detalhar_cargo.html')
+	context = {
+		'cargo' : result,
+	}
+	return HttpResponse(template.render(context, request))
 
+def alterar_cargo(request,id_cargo):
+	cargo = Cargo.objects.get(id=id_cargo)
+	context = {'cargo':cargo}
+	return render(request, 'editar_cargo.html', context)
+	
 def listar_cargo(request):
-	lista = Cargo.objects.all()
-	html = "<ul>"
-	for p in lista:
-		html+=f"<li>{p.nomeCargo} (id={p.id})</li>"
-	html+= "</ul>"
-	return HttpResponse(html)
+	result = Cargo.objects.all()
+	template = loader.get_template('listar_cargo.html')
+	context = {
+		'lista' : result,
+	}
+	return HttpResponse(template.render(context, request))
 
 def excluir_cargo(request, id_cargo):
 	try:
@@ -87,3 +136,12 @@ def excluir_cargo(request, id_cargo):
 		return HttpResponse(f"Excluiu {cargo.nomeCargo} (id={cargo.id})")
 	except ObjectDoesNotExist:
 		return HttpResponse("Cargo não encontrado")
+
+@csrf_exempt
+@require_http_methods(["POST","GET"])
+def salva_alt_cargo(request):
+	c = Cargo.objects.get(id=request.POST['id'])
+	c.nomeCargo 		= request.POST['nomeCargo']
+	c.descricaoCargo 	= request.POST['descricaoCargo']
+	c.save()
+	return HttpResponse("Cargo alterado com sucesso!")
