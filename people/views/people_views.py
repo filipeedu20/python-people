@@ -34,13 +34,13 @@ def excluir(request, id_pessoa):
 	except ObjectDoesNotExist:
 		return HttpResponse("Pessoa não encontrada")
 
-def cadastro(request):
-	sexos = ['Masculino','Feminino']
-	template = loader.get_template('cadastrar.html')
-	context = {
-		'sexos': sexos,
-	}
-	return HttpResponse(template.render(context, request))
+	def cadastro(request):
+		sexos = ['Masculino','Feminino']
+		template = loader.get_template('cadastrar.html')
+		context = {
+			'sexos': sexos,
+		}
+		return HttpResponse(template.render(context, request))
 
 def cadastrar(request):
 	dtNascimento = datetime.strptime(request.POST['dtNascimento'], "%d/%m/%Y").date()
